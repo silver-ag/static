@@ -7,7 +7,7 @@ def scope(*snds):
     layout = [[graph],
               [PSG.Text('Start'), PSG.Slider(range=(0, max([s.length for s in snds])), orientation = 'h', resolution = 0.001, default_value = 0, enable_events = True, key='start'),
                PSG.Button('Redraw')],
-              [PSG.Text('Range'), PSG.Slider(range=(0,1), orientation = 'h', resolution = 0.00001, default_value = 0.1, enable_events = True, key='range')]]
+              [PSG.Text('Range'), PSG.Slider(range=(0, 1), orientation = 'h', resolution = 0.00001, default_value = 0.1, enable_events = True, key='range')]]
     window = PSG.Window('scope', layout, finalize = True)
     def draw(snd, range, start, color):
         prev = (0,0)

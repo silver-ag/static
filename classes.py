@@ -2,6 +2,7 @@ import pyaudio
 from scipy.io import wavfile
 import numpy as np
 import math
+from threading import Thread
 
 # globals
 
@@ -19,8 +20,8 @@ class StaticPlayer:
         self.PAStream.stop_stream()
         self.PAStream.close()
         self.PA.terminate()
-    def play(self, sound):
-        self.PAStream.write(sound.render_pcm(self.render_srate, self.render_swidth).tobytes())
+    def play(self, sound, progress = False):
+        self.PAStream.write(sound.render_pcm(self.render_srate, self.render_swidth, progress=progress).tobytes())
     def save(self, sound, filename):
         sound.save(filename, self.render_srate, self.render_swidth)
 
@@ -30,7 +31,7 @@ class Sound:
         self.length = l
         self.memoised = memoised
         self._pcm = {}
-    def render_pcm(self, srate, swidth):
+    def render_pcm(self, srate, swidth, progress = False):
         if self.memoised and (srate,swidth) in self._pcm:
             return self._pcm[(srate,swidth)]
         else:
@@ -39,11 +40,30 @@ class Sound:
             pcm = np.zeros(total_samples, dtype=widthinfo.dtype)
             step = 1/srate
             for i in range(total_samples):
+                if progress:
+                    if i % round(total_samples/10) == 0:
+                        print(f"{round(100*i/total_samples)}%")
                 # f(t) returns a value -1 to 1, convert to min-max for pcm data
                 # (if min is not -max we want to just go to the maximum range that's centred on 0 so 0s are preserved)
                 pcm[i] = (int)(self.f(i*step) * min(widthinfo.max, abs(widthinfo.min)))
             if self.memoised:
                 self._pcm[(srate,swidth)] = pcm
+            return pcm
+    def render_pcm_chunk(self, srate, swidth, start, length):
+        if self.memoised and (srate,swidth) in self._pcm:
+            return self._pcm[(srate,swidth)][start:start+length]
+        else:
+            widthinfo = np.iinfo(global_sample_widths[swidth])
+            pcm = np.zeros(length, dtype=widthinfo.dtype)
+            step = 1/srate
+            for i in range(length):
+                # f(t) returns a value -1 to 1, convert to min-max for pcm data
+                # (if min is not -max we want to just go to the maximum range that's centred on 0 so 0s are preserved)
+                pcm[i] = (int)(self.f((start+i)*step) * min(widthinfo.max, abs(widthinfo.min)))
+            if self.memoised:
+                if (srate,swidth) not in self._pcm:
+                    self._pcm[(srate,swidth)] = np.zeros((int)(self.length*srate), dtype=widthinfo.dtype)
+                self._pcm[(srate,swidth)][start:start+length] = pcm
             return pcm
     def save(self, filename, srate, swidth):
         pcm = self.render_pcm(srate, swidth)
