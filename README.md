@@ -34,7 +34,7 @@ from static import StaticPlayer, Sound
 from static.effects import pitch_shift
 
 voice = Sound.from_file('speaking.wav')
-# sounds are represented by a function of sound to amplitude
+# sounds are represented by a function of time to amplitude
 # the underlying function of a sound is accessible at <sound>.f
 deep_voice = Sound(pitch_shift(voice.f, 0.75), voice.length)
 
