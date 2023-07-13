@@ -5,7 +5,7 @@ from .scales import classical_scale
 
 class SineInstrument(Instrument):
     def __init__(self, amplitude = 0.7):
-        super().__init__(self.f, TET, mode = 'avg')
+        super().__init__(self.f, classical_scale, mode = 'avg')
         self.amplitude = amplitude
     def f(self, pitch, length):
         return Sound(amp_mod(sinewave(pitch, self.amplitude), adsr(0.3*length, 1, 0.6*length, 0.5, 0.8*length, length)), length)

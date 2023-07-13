@@ -6,3 +6,4 @@ from .utils import scope
 from . import generators
 from . import effects
 from . import instruments
+from . import scales

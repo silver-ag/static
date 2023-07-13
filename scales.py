@@ -19,7 +19,7 @@ def classical_scale(note):
             letter = breakdown.group(1)
             accidental = breakdown.group(2)
             octave = breakdown.group(3)
-            notevalue = {'a': 0, 'b': 2, 'c': 3, 'd': 5, 'e': 7, 'f':8, 'g': 10}[letter]
+            notevalue = {'a': 0, 'b': 2, 'c': 3, 'd': 5, 'e': 7, 'f':8, 'g': 10}[letter.lower()]
             accidentalvalue = {'#': 1, 'b': -1, '': 0}[accidental]
             octavevalue = int(octave)
             return internal_scale(((octavevalue - 4) * 12) + notevalue + accidentalvalue)
